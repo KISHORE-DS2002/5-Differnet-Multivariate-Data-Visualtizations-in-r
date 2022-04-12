@@ -1,0 +1,23 @@
+---
+title: "Multivariate Analysis of Variance (MANOVA) - 19BCE1460"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+library(dplyr)
+require("datasets")
+penguinsdata <- read.csv("S:/WIN SEM 21-22/Data Visualization/Lab/penguins_lter.csv")
+penguinsdata <- na.omit(penguinsdata)
+str(penguinsdata)
+set.seed(1234)
+dplyr::sample_n(penguinsdata, 10)
+cul <- penguinsdata$CulmenLengthmm
+fli <- penguinsdata$FlipperLengthmm
+# MANOVA test
+res.man <- manova(cbind(CulmenLengthmm, FlipperLengthmm) ~ Island, data = penguinsdata)
+summary(res.man)
+summary.aov(res.man)
+
+```
+

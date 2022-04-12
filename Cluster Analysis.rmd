@@ -1,0 +1,122 @@
+---
+title: "Cluster Analysis - 19BCE1460"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+library(tidyverse)
+library(cluster)
+library(reshape2)
+library(gridExtra)
+require("datasets")
+penguinsdata <- read.csv("S:/WIN SEM 21-22/Data Visualization/Lab/penguins_lter.csv")
+penguinsdata <- na.omit(penguinsdata)
+glimpse(penguinsdata)
+head(penguinsdata)
+
+ggplot(penguinsdata)+
+  geom_point(aes(x = CulmenLengthmm, y = CulmenDepthmm), stroke = 2)+
+  facet_wrap(~ Island)+ 
+  labs(x = "CulmenLengthmm", y = "CulmenDepthmm")+
+  theme_bw()
+
+ggplot(penguinsdata)+
+  geom_point(aes(x = FlipperLengthmm, y = BodyMassg), stroke = 2)+
+  facet_wrap(~ Island)+ 
+  labs(x = "FlipperLengthmm", y = "BodyMassg")+
+  theme_bw()
+
+ggplot(penguinsdata)+
+  geom_point(aes(x = CulmenLengthmm, y = FlipperLengthmm), stroke = 2)+
+  facet_wrap(~ Island)+ 
+  labs(x = "CulmenLengthmm", y = "FlipperLengthmm")+
+  theme_bw()
+
+ggplot(penguinsdata)+
+  geom_point(aes(x = CulmenDepthmm, y = BodyMassg), stroke = 2)+
+  facet_wrap(~ Species)+ 
+  labs(x = "CulmenDepthmm", y = "BodyMassg")+
+  theme_bw()
+
+ggplot(penguinsdata)+
+  geom_boxplot(aes(x = Island, y = CulmenLengthmm, fill = Island))+
+  theme_bw()
+ggplot(penguinsdata)+
+  geom_boxplot(aes(x = Island, y = CulmenDepthmm, fill = Island))+
+  theme_bw()
+ggplot(penguinsdata)+
+  geom_boxplot(aes(x = Island, y = FlipperLengthmm, fill = Island))+
+  theme_bw()
+ggplot(penguinsdata)+
+  geom_boxplot(aes(x = Island, y = BodyMassg, fill = Island))+
+  theme_bw()
+#--------------------------------------------------------
+#K-means Clustering
+penguins.new<- penguinsdata[,c(10,11,12,13)]
+penguins.class<- penguinsdata[,"Region"]
+penguins.class = as.factor(penguins.class)
+head(penguins.new)
+head(penguins.class)
+#4. Create a function to normalize the data before clustering
+# Normalization
+normalize <- function(x){
+  return ((x-min(x))/(max(x)-min(x)))
+}
+penguins.new$CulmenLengthmm<- normalize(penguins.new$CulmenLengthmm)
+penguins.new$CulmenDepthmm<- normalize(penguins.new$CulmenDepthmm)
+penguins.new$FlipperLengthmm<- normalize(penguins.new$FlipperLengthmm)
+penguins.new$BodyMassg<- normalize(penguins.new$BodyMassg)
+head(penguins.new)
+#5. Apply k-means clustering algorithm with k = 3
+result<- kmeans(penguins.new,3) #aplly k-means algorithm with no. of centroids(k)=3
+#6. Find the number of records in each cluster
+result$size # gives no. of records in each cluster
+#7. Display the cluster center data point values 
+result$centers # gives value of cluster center datapoint value(3 centers for k=3)
+#8. Display the cluster vector showing the cluster where each record falls
+result$cluster #gives cluster vector showing the cluster where each record falls
+# Verify results of clustering
+par(mfrow=c(2,2), mar=c(5,4,2,2))
+plot(penguins.new[c(1,2)], col=result$cluster)
+plot(penguins.new[c(1,2)], col=penguins.class)
+plot(penguins.new[c(3,4)], col=result$cluster)
+plot(penguins.new[c(3,4)], col=penguins.class)
+result$cluster <- as.factor(result$cluster)
+#13.  Install the package ggplot2 and import it.
+library(ggplot2)
+#14. Plot the clusterresults using ggplot
+ggplot(penguins.new, aes(FlipperLengthmm, BodyMassg, color = result$cluster)) + geom_point()
+plot(penguins.new[c("CulmenLengthmm", "CulmenDepthmm")], col=result$cluster)
+#15. Display the clustering results with all parameters 
+plot(penguins.new[,], col=result$cluster)
+#16. Display the results in table
+table(result$cluster,penguins.class) # Result of table shows that Cluster 1 corresponds to Virginica, Cluster 2 corresponds to Versicolor and Cluster 3 to Setosa.
+#Total number of correctly classified instances are: 36 + 47 + 50= 133
+#Total number of incorrectly classified instances are: 3 + 14= 17
+#Accuracy = 133/(133+17) = 0.88 i.e our model has achieved 88% accuracy!
+#In order to improve this accuracy further, we may try different values of "k". 
+#=============================================================================
+# K means algorithms with Animation
+#==============================================================================
+#17. Display the K Means Algorithm with Animation and visualize the changes in the cluster center
+library(animation)
+km1<-kmeans.ani(penguins.new,3)
+#18. Import factoextra package and visualize the cluster result
+library(factoextra) # clustering algorithms & visualization
+fviz_cluster(result, data = penguins.new)
+#19. Explore the cluster analysis result with various value of k like 3,4,5
+k2 <- kmeans(penguins.new, centers = 2, nstart = 25)
+k3 <- kmeans(penguins.new, centers = 3, nstart = 25)
+k4 <- kmeans(penguins.new, centers = 4, nstart = 25)
+k5 <- kmeans(penguins.new, centers = 5, nstart = 25)
+
+# plots to compare
+p1 <- fviz_cluster(k2, geom = "point", data = penguins.new) + ggtitle("k = 2")
+p2 <- fviz_cluster(k3, geom = "point",  data = penguins.new) + ggtitle("k = 3")
+p3 <- fviz_cluster(k4, geom = "point",  data = penguins.new) + ggtitle("k = 4")
+p4 <- fviz_cluster(k5, geom = "point",  data = penguins.new) + ggtitle("k = 5")
+grid.arrange(p1, p2, p3, p4, nrow = 2)
+
+```
+

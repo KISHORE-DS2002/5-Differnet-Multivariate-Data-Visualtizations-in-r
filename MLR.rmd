@@ -1,0 +1,35 @@
+---
+title: "Multiple Linear Regression - 19BCE1460"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+require("datasets")
+penguinsdata <- read.csv("S:/WIN SEM 21-22/Data Visualization/Lab/penguins_lter.csv")
+penguinsdata <- na.omit(penguinsdata)
+head(penguinsdata)
+x1 = penguinsdata$CulmenLengthmm #Independent Variable
+x2 = penguinsdata$CulmenDepthmm #Independent Variable
+x3 = penguinsdata$FlipperLengthmm #Independent Variable
+y = penguinsdata$BodyMassg #Dependent Variable
+
+x1
+x2
+x3
+y
+summary(x1)
+summary(x2)
+summary(x3)
+summary(y)
+
+library(ggplot2)
+qplot(CulmenLengthmm, BodyMassg, data=penguinsdata)
+qplot(CulmenDepthmm, BodyMassg, data=penguinsdata)
+qplot(FlipperLengthmm, BodyMassg, data=penguinsdata)
+
+MLREG=lm(BodyMassg ~ CulmenLengthmm + CulmenDepthmm + FlipperLengthmm, penguinsdata)
+summary(MLREG)
+
+```
+

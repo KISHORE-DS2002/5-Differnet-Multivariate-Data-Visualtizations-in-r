@@ -1,0 +1,83 @@
+---
+title: "Factor Analysis - 19BCE1460"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+library(corpcor)
+library(GPArotation)
+library(psych)
+library(psy)
+library(ggplot2)
+library(MASS)
+library(MVN)
+require("datasets")
+penguinsdata <- read.csv("S:/WIN SEM 21-22/Data Visualization/Lab/penguins_lter.csv")
+penguinsdata <- na.omit(penguinsdata)
+penguins.new<- penguinsdata[,c(10,11,12,13)]
+penguinsmatrix <- cor(penguins.new)
+round(penguinsmatrix,2)
+
+X <- cor(penguins.new) 
+iX <- ginv(X) 
+S2 <- diag(diag((iX^-1)))
+AIS <- S2%*%iX%*%S2                      # anti-image covariance matrix
+IS <- X+AIS-2*S2                         # image covariance matrix
+Dai <- sqrt(diag(diag(AIS)))
+IR <- ginv(Dai)%*%IS%*%ginv(Dai)         # image correlation matrix
+AIR <- ginv(Dai)%*%AIS%*%ginv(Dai)       # anti-image correlation matrix
+
+print(diag(AIR), row.names = FALSE)
+
+#Measure of Sampling Accuracy (MSA) using KMO Test
+penguinsmatrix <- cor(penguins.new)
+KMO(penguinsmatrix)
+
+#Bartlett's Test of Sphericity
+penguinsmatrix <- cor(penguins.new)
+cortest.bartlett(penguinsmatrix)
+
+#PCA
+pc1 <- principal(penguins.new,nfactors = length(penguins.new), rotate = "none")
+pc1
+
+cat("Eigen values\n")
+print(pc1$values)
+
+#Scree plot
+plot(pc1$values, type = "b",xlab = "Factors", ylab = "Eigen values", main = "SCREE PLOT") 
+
+#Principal axis factoring
+penguinsmatrix <- cor(penguins.new)
+solution <- fa(r=penguinsmatrix, nfactors = 2, rotate = "none", fm = "pa") 
+print(solution)
+
+print(solution$loadings)
+fa.diagram(solution)
+
+#Orthogonal varmax rotation
+penguinsmatrix <- cor(penguins.new)
+solution1 <- fa(r=penguinsmatrix, nfactors = 2, rotate = "varimax", fm = "pa")
+print(solution1)
+print(solution1$loadings)
+
+fa.diagram(solution1)
+
+#Oblique rotation (oblimin)
+penguinsmatrix <- cor(penguins.new)
+solution2 <- fa(r=penguinsmatrix, nfactors = 2, rotate = "oblimin", fm = "pa")
+print(solution2)
+
+print(solution2$loadings)
+
+cronbach(penguins.new)
+
+#Orthogonal Rotation (varimax)
+fa.diagram(solution1)
+
+#Oblique Rotation (oblimin)
+fa.diagram(solution2)
+
+```
+
